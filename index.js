@@ -23,9 +23,12 @@ client.on('messageCreate', (message) => {
 
   if (command === 'help' || command === 'h') {
     message.channel.send(
-      `Hi! I'm ${client.user.username} this are the commands: \n
-       .play or .p : to play music by url or searching it\n
-       .stop or .s : to stop music and disconect bot\n`
+      `\n \nHi! I'm ${client.user.username} this are the commands: \n
+       ${PREFIX}play or ${PREFIX}p : to play music by url or searching it\n
+       ${PREFIX}stop or ${PREFIX}s : to stop music and disconect bot\n
+       ${PREFIX}pause or ${PREFIX}pp : to pause song\n
+       ${PREFIX}resume or ${PREFIX}r : to resume song\n
+       ${PREFIX}skip or ${PREFIX}ss : to skip song\n`
     );
   }
   if (command === 'puto') {
