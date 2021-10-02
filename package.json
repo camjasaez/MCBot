@@ -1,6 +1,9 @@
 {
   "name": "discord-bot",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "engines": {
+    "node": "16.10.0"
+  },
   "description": "\"Un bot de musica para el servidor de los panas\"",
   "main": "index.js",
   "scripts": {
