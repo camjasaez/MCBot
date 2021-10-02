@@ -12,7 +12,9 @@ const distube = new DisTube.default(client, {
   leaveOnStop: false,
   plugins: [new SpotifyPlugin()],
 });
+
 client.commands = new Collection();
+
 client.once('ready', () => {
   console.log(`${client.user.username} Logged in!`);
   presence();
@@ -21,31 +23,7 @@ client.once('ready', () => {
   });
 });
 
-/* 
-
-!Todo : Valdiar cada comando para evitar crasheos del bot. Y validar distintos errores
-?Todo: Agregar sonido predeterminados por las acciones
-!Todo: Abstraer logica del texto de ayuda para soportar distintos idiomas.
-
-todoing: Arreglar eventos del distube ( playSong, blabla)
-
-* todo: Agragar compatibilidad con spotify
-* Estilar con emojis los textos
-* Agregar comnado para ver la queue
-* Crear validaciones para utilizar el bot solo una vez inicializado en un canal especifico.
-* Crear mensaje embebido que tenga la informacion de la cancion sonando.
-* Creando mensajes embebidos para los comandos.
-* Creando boilerplate para mensajes embebidos
-* Agregar "estado de reproduccion" cuando suene una song, y cuando no suene nada dejar el texto de ayuda.
-
-*/
-
-const embedBoilerplate = ({
-  title = '',
-  description = '',
-  color = '',
-  footer = '',
-}) => {
+const embedBoilerplate = ({ title, description, color, footer }) => {
   const messageEmbed = new MessageEmbed()
     .setTitle(title)
     .setDescription(description)
@@ -53,15 +31,6 @@ const embedBoilerplate = ({
     .setFooter(footer);
 
   return { embeds: [messageEmbed] };
-
-  // message.channel.send(
-  //   embedBoilerplate({
-  //     title: '',
-  //     description: '',
-  //     color: '',
-  //     footer: `~${command}~`,
-  //   })
-  // );
 };
 
 const presence = (songName) => {
@@ -93,8 +62,6 @@ client.on('messageCreate', async (message) => {
       auth: true,
     };
 
-    console.log(client.commands);
-
     await message.channel.send(
       embedBoilerplate({
         title: `:white_check_mark: Comand: Auth!`,
@@ -111,7 +78,7 @@ client.on('messageCreate', async (message) => {
     );
     return;
   }
-  // :arrow_forward: :pause_button: :stop_button: :track_next:
+
   if (command === 'help' || command === 'h') {
     await message.channel.send(
       embedBoilerplate({
@@ -133,8 +100,6 @@ client.on('messageCreate', async (message) => {
   if (command === 'puto')
     message.channel.send(`${message.author.username} es putooo`);
 
-  //!todo: manejo de error para urls que no sirvan... *MEJORAR*
-  //todo: mostrar lo que se reproduce
   if (command === 'play' || command === 'p') {
     try {
       args.length
@@ -268,6 +233,5 @@ distube
     song ? presence(song.name) : presence();
   })
   .on('finishSong', () => presence());
-// distube.on('disconnect',() => )
 
 client.login(process.env.DISCORD_BOT_TOKEN);
