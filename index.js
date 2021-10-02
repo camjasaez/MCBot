@@ -1,14 +1,18 @@
 require('dotenv').config();
-const { MessageEmbed, Client } = require('discord.js');
+const { MessageEmbed, Client, Collection } = require('discord.js');
 const DisTube = require('distube');
+const { SpotifyPlugin } = require('@distube/spotify');
 const PREFIX = '!!';
 
 const client = new Client({
   intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES'],
 });
 
-const distube = new DisTube.default(client, { leaveOnStop: false });
-
+const distube = new DisTube.default(client, {
+  leaveOnStop: false,
+  plugins: [new SpotifyPlugin()],
+});
+client.commands = new Collection();
 client.once('ready', () => {
   console.log(`${client.user.username} Logged in!`);
   presence();
@@ -18,22 +22,22 @@ client.once('ready', () => {
 });
 
 /* 
+
 !Todo : Valdiar cada comando para evitar crasheos del bot. Y validar distintos errores
-!Todo: Agregar manejo de playlist:
-!Todo: -Skip para las playlist
 ?Todo: Agregar sonido predeterminados por las acciones
 !Todo: Abstraer logica del texto de ayuda para soportar distintos idiomas.
-!Todo: Estilar con emojis los textos
 
+todoing: Arreglar eventos del distube ( playSong, blabla)
 
+* todo: Agragar compatibilidad con spotify
+* Estilar con emojis los textos
+* Agregar comnado para ver la queue
+* Crear validaciones para utilizar el bot solo una vez inicializado en un canal especifico.
+* Crear mensaje embebido que tenga la informacion de la cancion sonando.
+* Creando mensajes embebidos para los comandos.
+* Creando boilerplate para mensajes embebidos
+* Agregar "estado de reproduccion" cuando suene una song, y cuando no suene nada dejar el texto de ayuda.
 
-
-*Todo: Agregar comnado para ver la queue
-*Todo: Crear validaciones para utilizar el bot solo una vez inicializado en un canal especifico.
-*Todo: Crear mensaje embebido que tenga la informacion de la cancion sonando.
-*Todo: Creando mensajes embebidos para los comandos.
-*Todo: Creando boilerplate para mensajes embebidos
-*Todo: Agregar "estado de reproduccion" cuando suene una song, y cuando no suene nada dejar el texto de ayuda.
 */
 
 const embedBoilerplate = ({
@@ -89,10 +93,12 @@ client.on('messageCreate', async (message) => {
       auth: true,
     };
 
+    console.log(client.commands);
+
     await message.channel.send(
       embedBoilerplate({
-        title: 'Comand: Auth!',
-        description: `You autorized ${client.user.username}`,
+        title: `:white_check_mark: Comand: Auth!`,
+        description: ` You autorized ${client.user.username}`,
         color: 'BLACK',
         footer: `~${command}~`,
       })
@@ -100,21 +106,24 @@ client.on('messageCreate', async (message) => {
   }
 
   if (message.channelId != channelAuth.id) {
-    message.channel.send(`**The ${client.user.username} cannot be used here**`);
+    message.channel.send(
+      `:x: **The ${client.user.username} cannot be used here**`
+    );
     return;
   }
-
+  // :arrow_forward: :pause_button: :stop_button: :track_next:
   if (command === 'help' || command === 'h') {
     await message.channel.send(
       embedBoilerplate({
-        title: `**Hi! I'm ${client.user.username} this are the commands: **`,
-        description: `**${PREFIX}play** or **${PREFIX}p** : to play music by url or searching it\n
-          **${PREFIX}stop** or **${PREFIX}s** : to stop music and disconect bot\n
-          **${PREFIX}paus**e or **${PREFIX}pp** : to pause song\n
-          **${PREFIX}resume** or **${PREFIX}r** : to resume song\n
-          **${PREFIX}skip** or **${PREFIX}ss** : to skip song\n
-          **${PREFIX}queue** or **${PREFIX}q** : to see the queue\n
-          **${PREFIX}playing** or **${PREFIX}pl** : to watch the playback `,
+        title: `**Hi! I'm ${client.user.username} this are the commands: ** :face_with_monocle: `,
+        description: `:arrow_forward: **${PREFIX}play** or **${PREFIX}p** : to play music by url or searching it\n
+        :stop_button: **${PREFIX}stop** or **${PREFIX}s** : to stop music and disconect bot\n
+        :pause_button: **${PREFIX}paus**e or **${PREFIX}pp** : to pause song\n
+        :arrow_forward:  **${PREFIX}resume** or **${PREFIX}r** : to resume song\n
+        :track_next: **${PREFIX}skip** or **${PREFIX}ss** : to skip song\n
+        :asterisk: **${PREFIX}queue** or **${PREFIX}q** : to see the queue\n
+        :musical_note: **${PREFIX}playing** or **${PREFIX}pl** : to watch the playback\n
+         :green_circle: ** Spotify and ** :red_circle: **Youtube support!** `,
         color: 'BLUE',
         footer: `~${command}~`,
       })
@@ -125,13 +134,14 @@ client.on('messageCreate', async (message) => {
     message.channel.send(`${message.author.username} es putooo`);
 
   //!todo: manejo de error para urls que no sirvan... *MEJORAR*
+  //todo: mostrar lo que se reproduce
   if (command === 'play' || command === 'p') {
     try {
       args.length
         ? await distube.play(message, args.join(' '))
         : message.channel.send('Enter a url or search pls!');
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -141,7 +151,7 @@ client.on('messageCreate', async (message) => {
 
       await message.channel.send(
         embedBoilerplate({
-          title: 'Comand: Stop!',
+          title: `:stop_button: Comand: Stop!`,
           description: 'Music stopped',
           color: 'RED',
           footer: `~${command}~`,
@@ -149,7 +159,7 @@ client.on('messageCreate', async (message) => {
       );
       presence();
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -159,14 +169,14 @@ client.on('messageCreate', async (message) => {
 
       await message.channel.send(
         embedBoilerplate({
-          title: 'Comand: Pause!',
+          title: `:pause_button: Comand: Pause!`,
           description: 'Music paused',
           color: 'YELLOW',
           footer: `~${command}~`,
         })
       );
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -175,14 +185,14 @@ client.on('messageCreate', async (message) => {
       distube.resume(message);
       await message.channel.send(
         embedBoilerplate({
-          title: 'Comand: Resume!',
+          title: `:arrow_forward: Comand: Resume!`,
           description: 'Music resumed',
           color: 'GREEN',
           footer: `~${command}~`,
         })
       );
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -191,14 +201,14 @@ client.on('messageCreate', async (message) => {
       await distube.skip(message);
       message.channel.send(
         embedBoilerplate({
-          title: 'Comand: Skip!',
+          title: `:track_next: Comand: Skip!`,
           description: 'Music Skipped',
           color: 'ORANGE',
           footer: `~${command}~`,
         })
       );
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -207,7 +217,7 @@ client.on('messageCreate', async (message) => {
       const queue = distube.getQueue(message);
       queue
         ? await message.channel.send(
-            'Current queue:\n' +
+            `:asterisk: Current queue:\n` +
               queue.songs
                 .map(
                   (song, id) =>
@@ -217,9 +227,9 @@ client.on('messageCreate', async (message) => {
                 )
                 .join('\n')
           )
-        : await message.channel.send(`**No current queue available**`);
+        : await message.channel.send(`**No current  queue available**`);
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 
@@ -232,7 +242,7 @@ client.on('messageCreate', async (message) => {
       nameSong != `${PREFIX}help`
         ? await message.channel.send(
             embedBoilerplate({
-              title: 'Comand: Playing',
+              title: `:musical_note: Comand: Playing`,
               description: `=> Playing: ${nameSong}`,
               color: 'GREEN',
               footer: `~${command}~`,
@@ -240,20 +250,24 @@ client.on('messageCreate', async (message) => {
           )
         : await message.channel.send(
             embedBoilerplate({
-              title: 'Comand: Playing',
+              title: `:musical_note: Comand: Playing`,
               description: `=> Playing: None`,
               color: 'RED',
               footer: `~${command}~`,
             })
           );
     } catch (error) {
-      message.channel.send(`**${error.message}**`);
+      message.channel.send(`:x: **${error.message}**`);
     }
   }
 });
 
-distube.on('playSong', (_, song) => (song ? presence(song.name) : presence()));
-distube.on('finishSong', () => presence());
+distube
+  .on('playSong', (queue, song) => {
+    queue.textChannel.send(`Playing \`${song.name}\``);
+    song ? presence(song.name) : presence();
+  })
+  .on('finishSong', () => presence());
 // distube.on('disconnect',() => )
 
 client.login(process.env.DISCORD_BOT_TOKEN);
