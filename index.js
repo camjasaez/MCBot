@@ -237,3 +237,4 @@ distube
   .on('finishSong', () => presence());
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+// V0.1.1
