@@ -180,19 +180,21 @@ client.on('messageCreate', async (message) => {
   if (command == 'queue' || command == 'q') {
     try {
       const queue = distube.getQueue(message);
+
       queue
         ? await message.channel.send(
-            `:asterisk: Current queue:\n` +
+            `:asterisk: Current queue: (Total songs in queue: ${queue.songs.length})\n` +
               queue.songs
-                .map(
-                  (song, id) =>
-                    `**${id + 1}**. [${song.name}](${song.url}) - \`${
-                      song.formattedDuration
-                    }\``
+                .map((song, id) =>
+                  id < 15
+                    ? `**${id + 1}**. [${song.name}] - \`${
+                        song.formattedDuration
+                      }\``
+                    : ''
                 )
                 .join('\n')
           )
-        : await message.channel.send(`**No current  queue available**`);
+        : await message.channel.send(`:x: **No current  queue available**`);
     } catch (error) {
       message.channel.send(`:x: **${error.message}**`);
     }
@@ -229,7 +231,7 @@ client.on('messageCreate', async (message) => {
 
 distube
   .on('playSong', (queue, song) => {
-    queue.textChannel.send(`Playing \`${song.name}\``);
+    queue.textChannel.send(`:arrow_forward: Playing \`${song.name}\``);
     song ? presence(song.name) : presence();
   })
   .on('finishSong', () => presence());
