@@ -99,9 +99,6 @@ client.on('messageCreate', async (message) => {
     );
   }
 
-  if (command === 'puto')
-    message.channel.send(`${message.author.username} es putooo`);
-
   if (command === 'play' || command === 'p') {
     try {
       args.length
