@@ -4,6 +4,10 @@
 
 _MC bot is a minimalist bot for Discord_
 
+## Before to use
+
+- You need to add local variables with "DISCORD_BOT_TOKEN" to value of your bot token.
+
 ## How to use
 
 - Select a text channel and type !!auth or !!a for autorizate the bot to execute all commands there
