@@ -8,6 +8,8 @@ const client = new Client({
   intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES'],
 });
 
+client.options.http.api = 'https://discord.com/api';
+
 const distube = new DisTube.default(client, {
   leaveOnStop: false,
   plugins: [new SpotifyPlugin()],
